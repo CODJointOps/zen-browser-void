@@ -93,6 +93,6 @@ jobs:
           git add template
           if ! git diff --cached --quiet; then
             git commit -m "Update to v${{ steps.get_release.outputs.version }} [auto]"
-            git pull --rebase origin main
+            git pull --rebase origin master
             git push
           fi
