@@ -13,7 +13,7 @@ changelog="https://github.com/zen-browser/desktop/releases"
 case "$XBPS_TARGET_MACHINE" in
 x86_64)
 	distfiles="https://github.com/zen-browser/desktop/releases/download/${version}/zen.linux-x86_64.tar.xz"
-	checksum=2a6740a3a276b087a21f6a2224e16c7a83c22d8104e444e45b8ac8d91c858c7f
+	checksum=7f8ed156cc7f69b7a4a4de7b50291f3dceb0966d30a8dbd941f7340643bad404
 	;;
 aarch64)
 	distfiles="https://github.com/zen-browser/desktop/releases/download/${version}/zen.linux-aarch64.tar.xz"
