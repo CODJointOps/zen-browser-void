@@ -64,26 +64,19 @@ jobs:
         if: steps.get_release.outputs.version && steps.get_release.outputs.version != steps.check_version.outputs.current_version
         run: |
           sed -i "s/^version=.*/version=${{ steps.get_release.outputs.version }}/" template
-          sed -i "s/^\tchecksum=.*x86_64.*/\tchecksum=${{ steps.download.outputs.x86_sha256 }}/" template
-          
-          # Update x86_64 checksum in case block
-          awk -v new_checksum="${{ steps.download.outputs.x86_sha256 }}" '
-            /^x86_64\)/ { in_x86=1 }
-            /^aarch64\)/ { in_x86=0; in_aarch64=1 }
-            /^\*\)/ { in_aarch64=0 }
-            in_x86 && /checksum=/ { sub(/checksum=.*/, "checksum=" new_checksum); }
+
+          # Update checksums in architecture case block.
+          awk -v x86_checksum="${{ steps.download.outputs.x86_sha256 }}" \
+              -v aarch64_checksum="${{ steps.download.outputs.aarch64_sha256 }}" '
+            /^x86_64\*\)/ { in_x86=1; in_aarch64=0 }
+            /^aarch64\*\)/ { in_x86=0; in_aarch64=1 }
+            /^\*\)/ { in_x86=0; in_aarch64=0 }
+            in_x86 && /_checksum=/ { sub(/_checksum=.*/, "_checksum=" x86_checksum) }
+            in_aarch64 && /_checksum=/ && aarch64_checksum != "" {
+              sub(/_checksum=.*/, "_checksum=" aarch64_checksum)
+            }
             { print }
           ' template > template.tmp && mv template.tmp template
-          
-          # Update aarch64 checksum if available
-          if [[ -n "${{ steps.download.outputs.aarch64_sha256 }}" ]]; then
-            awk -v new_checksum="${{ steps.download.outputs.aarch64_sha256 }}" '
-              /^aarch64\)/ { in_aarch64=1 }
-              /^\*\)/ { in_aarch64=0 }
-              in_aarch64 && /checksum=/ { sub(/checksum=.*/, "checksum=" new_checksum); }
-              { print }
-            ' template > template.tmp && mv template.tmp template
-          fi
 
       - name: Commit and Push
         if: steps.get_release.outputs.version && steps.get_release.outputs.version != steps.check_version.outputs.current_version
