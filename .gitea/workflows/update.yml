@@ -63,7 +63,10 @@ jobs:
       - name: Update Template
         if: steps.get_release.outputs.version && steps.get_release.outputs.version != steps.check_version.outputs.current_version
         run: |
-          sed -i "s/^version=.*/version=${{ steps.get_release.outputs.version }}/" template
+          sed -i \
+            -e "s/^version=.*/version=${{ steps.get_release.outputs.version }}/" \
+            -e "s/^revision=.*/revision=1/" \
+            template
 
           # Update checksums in architecture case block.
           awk -v x86_checksum="${{ steps.download.outputs.x86_sha256 }}" \
